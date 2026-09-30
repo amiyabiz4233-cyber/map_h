@@ -12,7 +12,7 @@
   ・発電所のデータは暗号化して下の ENC に入っている。パスワードが無いと1件も読めない
       方式：JSON → gzip → AES-256-CTR、改ざん検知 HMAC-SHA256、
             鍵は PBKDF2-HMAC-SHA256 310,000回（パスワード＋salt から64byte）
-  ・パスワードの受け取り順：① URL の #k=… → ② この端末に保存済み → ③ 手入力
+  ・パスワードの受け取り順：① URL の #k=… または #… → ② この端末に保存済み → ③ 手入力
       解除できたら URL の #k=… はアドレスバーから消す（ブックマーク側は残る）
   ・このファイルは「公開版作成ツール」が自動で作る。手で直さないこと
   ・地図：Leaflet 1.9.4（埋め込み）。背景の写真・地図はネット接続が必要
@@ -791,14 +791,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
   #toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);background:rgba(30,30,30,.9);
     color:#fff;padding:9px 14px;border-radius:8px;font-size:13px;z-index:4000;display:none;
     max-width:90vw;line-height:1.5}
-  /* ---------- 📍ボタン（地図の左上、ズームの下） ---------- */
-  .gpsbtn{width:34px;height:34px;background:#fff;border-radius:4px;border:2px solid rgba(0,0,0,.2);
-    font-size:18px;line-height:30px;text-align:center;cursor:pointer;user-select:none}
-  .gpsbtn.on{background:#e8f0fe}
+  /* ---------- 現在地ボタン（v6：地図の右下。＋−の上） ---------- */
+  /* 現在地ボタン（Googleマップ風の丸い白ボタン） */
+  .locbtn{width:44px;height:44px;border-radius:50%;background:#fff;border:none;cursor:pointer;
+    box-shadow:0 1px 4px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;
+    margin-bottom:6px!important;-webkit-tap-highlight-color:transparent}
+  .locbtn svg{width:24px;height:24px;fill:#666}
+  .locbtn.fix svg{fill:#666}          /* 取れている（中の点あり） */
+  .locbtn.follow svg{fill:#1a73e8}    /* 追いかけ中は青 */
+  .locbtn:active{background:#f1f3f4}
+  /* 現在地の青い点（Googleマップ風：白ふち＋影） */
+  .me{box-shadow:0 1px 4px rgba(0,0,0,.35)!important}
+  /* ズーム＋−も丸みのある白に */
+  .leaflet-control-zoom{border:none!important;box-shadow:0 1px 4px rgba(0,0,0,.3)!important;border-radius:8px!important;overflow:hidden}
+  .leaflet-control-zoom a{width:44px!important;height:40px!important;line-height:40px!important;font-size:20px!important;color:#666!important}
   .legend .lg-h{cursor:pointer}
 
   /* ---------- GPSが使えないときの帯（地図の上端） ---------- */
-  #gpsBar{position:absolute;top:8px;left:56px;right:56px;z-index:1000;display:none;
+  #gpsBar{position:absolute;top:8px;left:10px;right:60px;z-index:1000;display:none;
     background:#fff4e5;border:1px solid #f2b366;color:#7a4a00;border-radius:8px;padding:7px 10px;
     font-size:13px;align-items:center;gap:8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
   #gpsBar .t{flex:1;line-height:1.35}
@@ -830,6 +840,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     aside{order:3;border-right:none;border-top:1px solid var(--line);max-height:44px;overflow:hidden}
     aside.open{max-height:58vh}                          /* 開いたとき：画面の6割まで */
     #sheetBtn{display:block;flex:0 0 auto}
+    .leaflet-control-zoom{display:none}                  /* スマホは指で拡大するので＋−は隠す（Googleマップと同じ） */
     .legend .lg-b{display:none}                          /* 凡例は見出しだけ */
     .legend.open .lg-b{display:block}
   }
@@ -860,7 +871,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v5 202609301742</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v6 202609301748</span></h1>
     <div class="kpi" id="kpi"></div>
   </header>
 
@@ -888,7 +899,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -932,7 +943,7 @@ let showLabels = false;   // 名前ラベルを常時表示するか
 //   wheelDebounceTime:10  … ホイール操作からズーム開始までの待ちを短く（既定40ms）
 //   zoomAnimationThreshold:2 … 3段以上の一気ズームはアニメーションせず即切替
 const map = L.map('map', {
-  zoomControl:true, fadeAnimation:false,
+  zoomControl:false, fadeAnimation:false,   // ＋−は右下に付け直す（v6）
   wheelPxPerZoomLevel:60, wheelDebounceTime:10, zoomAnimationThreshold:2
 });
 
@@ -962,6 +973,7 @@ base['航空写真（Esri・速い）'].addTo(map);   // 既定＝航空写真
 overlay['道路・地名を重ねる'].addTo(map);
 L.control.layers(base, overlay, {collapsed:true}).addTo(map);
 L.control.scale({imperial:false}).addTo(map);  // 縮尺（m/km）
+L.control.zoom({position:'bottomright', zoomInTitle:'拡大', zoomOutTitle:'縮小'}).addTo(map);  // v6：右下（この上に現在地ボタンが乗る）
 
 /* ---------- 凡例（右下） ---------- */
 const legend = L.control({position:'bottomright'});
@@ -1114,6 +1126,7 @@ function selectItem(no, move){
     // → setView で一気に移動（アニメーションは短い平行移動/ズームだけ）
     const m = markers[no];
     if(isMobile()) setSheet(false);   // スマホ：メニューを閉じて地図を見せる
+    if(followMe){ followMe = false; setLocIcon(); }   // v6：発電所を見に行くので追いかけ終了
     map.setView(m.getLatLng(), 17);
     m.openPopup();
   }
@@ -1159,7 +1172,7 @@ document.getElementById('kpi').innerHTML =
    ------------------------------------------------------------
    ・取れたら：青い点＋誤差の円を出し、「現在地」ボタンを表示。移動に合わせて更新する
    ・取れなかったら：地図には何も出さない
-     📍ボタンを押したときだけ、取れない理由を画面下に3秒出す（v4）
+     現在地ボタンを押したときだけ、取れない理由を画面下に3秒出す（v4）
      取れない例：PCでファイルとして開いた／iPhoneで https 以外から開いた／位置情報を「許可しない」にした
    ・勝手に現在地へ地図を動かすことはしない（見ている場所が飛ぶと使いにくいため）
    ============================================================ */
@@ -1181,7 +1194,7 @@ const GPS_OK = ('geolocation' in navigator) && window.isSecureContext;
       meMarker = L.marker(ll,{icon:L.divIcon({className:'',html:'<div class="me"></div>',iconSize:[18,18],iconAnchor:[9,9]}),
                               zIndexOffset:1000, keyboard:false})
                   .bindTooltip('現在地',{direction:'top',offset:[0,-10]}).addTo(map);
-      gpsBtn.classList.add('on');   // 📍を「取れている」表示に
+      setLocIcon();   // v6：ボタンを「取れている」アイコンに
     }else{
       // 2回目以降：位置と円の大きさだけ更新
       meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(acc);
@@ -1189,7 +1202,8 @@ const GPS_OK = ('geolocation' in navigator) && window.isSecureContext;
     gpsErr = null;
     if(window.hideGpsBar) hideGpsBar();   // v5：取れたら帯を消す
     // 📍を押して待っていたら、取れた時点でそこへ移動
-    if(gpsWantCenter){ gpsWantCenter = false; map.setView(ll, Math.max(map.getZoom(),15)); }
+    if(gpsWantCenter){ gpsWantCenter = false; followMe = true; setLocIcon(); map.setView(ll, Math.max(map.getZoom(),16)); }
+    else if(followMe) map.panTo(ll, {animate:true});   // v6：追いかけ中は地図がついてくる
   }
   // 失敗（許可しない・電波なし・タイムアウト）は理由を覚えておくだけ（勝手には表示しない）
   //   取れた後に失敗しても最後の位置は残す
@@ -1203,7 +1217,7 @@ const GPS_OK = ('geolocation' in navigator) && window.isSecureContext;
   window.__gpsOnErr = onErr;
 
   // watchPosition：動くと自動で更新される。maximumAge で5秒以内の値は使い回して電池を節約
-  window.__gpsOnPos = onPos;   // 📍ボタンの取り直しからも同じ処理を使う
+  window.__gpsOnPos = onPos;   // 現在地ボタンの取り直しからも同じ処理を使う
   watchIdBoot = navigator.geolocation.watchPosition(onPos, onErr, {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
 })();
 // 取れない理由を日本語に
@@ -1221,27 +1235,42 @@ function toast(msg){
   t.textContent = msg; t.style.display = 'block';
   clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.style.display='none', msg.length>40 ? 6000 : 3000);
 }
-// 📍ボタン（ズームの下）
-let gpsBtn;
-const gpsCtl = L.control({position:'topleft'});
+// 現在地ボタン（v6：Googleマップ風。右下の＋−の上に乗る）
+const ICON_SEARCH = '<svg viewBox="0 0 24 24"><path d="M20.94 11A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>';   // 取れていない
+const ICON_FIX    = '<svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zM20.94 11A8.994 8.994 0 0013 3.06V1h-2v2.06A8.994 8.994 0 003.06 11H1v2h2.06A8.994 8.994 0 0011 20.94V23h2v-2.06A8.994 8.994 0 0020.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>';      // 取れている
+let gpsBtn, followMe = false;   // followMe：現在地を追いかけ中か
+function setLocIcon(){
+  if(!gpsBtn) return;
+  gpsBtn.innerHTML = meMarker ? ICON_FIX : ICON_SEARCH;
+  gpsBtn.classList.toggle('fix', !!meMarker);
+  gpsBtn.classList.toggle('follow', !!meMarker && followMe);
+}
+function goMe(){
+  followMe = true; setLocIcon();
+  map.setView(meMarker.getLatLng(), Math.max(map.getZoom(),16));
+}
+const gpsCtl = L.control({position:'bottomright'});
 gpsCtl.onAdd = ()=>{
-  gpsBtn = L.DomUtil.create('div','gpsbtn leaflet-bar');
-  gpsBtn.textContent = '📍'; gpsBtn.title = '現在地';
+  gpsBtn = L.DomUtil.create('button','locbtn');
+  gpsBtn.title = '現在地'; gpsBtn.setAttribute('aria-label','現在地');
   L.DomEvent.disableClickPropagation(gpsBtn);
+  setLocIcon();
   gpsBtn.onclick = ()=>{
-    if(meMarker){ map.setView(meMarker.getLatLng(), Math.max(map.getZoom(),15)); return; }
+    if(meMarker){ goMe(); return; }
     if(!GPS_OK){ toast(gpsMsg(null)); return; }
-    if(gpsErr && (gpsErr.code===1 || gpsErr.code===2)){ showGpsHelp(gpsMsg(gpsErr)); return; }   // v5：拒否済みは聞き直せないので設定方法を出す
+    if(gpsErr && (gpsErr.code===1 || gpsErr.code===2)){ showGpsHelp(gpsMsg(gpsErr)); return; }   // 拒否済みは設定方法へ
     // まだ取れていない：押したのをきっかけにもう一度取りに行く（iPhoneはタップ起点だと許可画面が出やすい）
     gpsWantCenter = true; toast('現在地を探しています…');
-    navigator.geolocation.getCurrentPosition(p=>{ /* watchPosition 側の onPos と同じ処理 */
-      gpsWantCenter = true; window.__gpsOnPos && window.__gpsOnPos(p); },
-      e=>{ gpsWantCenter = false; gpsErr = e; toast(gpsMsg(e)); },
+    navigator.geolocation.getCurrentPosition(p=>{
+        gpsWantCenter = true; window.__gpsOnPos && window.__gpsOnPos(p); followMe = true; setLocIcon(); },
+      e=>{ gpsWantCenter = false; gpsErr = e; toast(gpsMsg(e)); if(e.code!==3) showGpsHelp(gpsMsg(e)); },
       {enableHighAccuracy:true, maximumAge:5000, timeout:15000});
   };
   return gpsBtn;
 };
 gpsCtl.addTo(map);
+// 地図を指で動かしたら追いかけ終了（Googleマップと同じ）
+map.on('dragstart', ()=>{ if(followMe){ followMe = false; setLocIcon(); } });
 
 /* ---------- iPhone：ページ全体のピンチ拡大を止める（地図の拡大縮小は効く） ----------
    gesture系は iOS Safari だけが出すイベント。passive:false でないと止められない。
@@ -1424,13 +1453,18 @@ async function decryptData(b64, password){
    解除の流れ
    ============================================================ */
 const LS_KEY = "hatsudenshoMap_pw";   // この端末に覚えておくパスワードの保存名
+// URLの # より後ろをパスワードとして読む（v6.1）
+//   #k=パスワード（元の形）と #パスワード（短い形）のどちらでも開ける
 function getPwFromUrl(){
-  const m = (location.hash || "").match(/[#&]k=([^&]+)/);
-  return m ? decodeURIComponent(m[1]) : null;
+  const h = (location.hash || "").replace(/^#/, "");
+  if(!h) return null;
+  const m = h.match(/(?:^|&)k=([^&]+)/);
+  return decodeURIComponent(m ? m[1] : h);
 }
 // 解除できたらアドレスバーから #k=… を消す（肩越し・スクショ対策）
 function stripKeyFromUrl(){
-  if(location.hash && /[#&]k=/.test(location.hash) && history.replaceState)
+  // v6.1：#パスワード の短い形も消す（# の後ろに何かあれば消す）
+  if(location.hash && location.hash.length > 1 && history.replaceState)
     history.replaceState(null, "", location.pathname + location.search);
 }
 function lsGet(){ try{ return localStorage.getItem(LS_KEY); }catch(e){ return null; } }
