@@ -797,6 +797,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .lbl{background:none;border:none;box-shadow:none;padding:0;color:#fff;font-size:12px;font-weight:700;
     white-space:nowrap;text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000;pointer-events:none}
   .lbl::before{display:none}
+  /* v7.9：本社（発電所ではない拠点）は家のマーク */
+  .ofc{position:relative;width:34px;height:34px;border-radius:50%;background:#1f4e79;border:2.5px solid #fff;
+    box-shadow:0 2px 4px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
+  .ofc svg{width:20px;height:20px;fill:#fff}
+  .ofclbl{background:none;border:none;box-shadow:none;padding:0;color:#fff;font-size:12.5px;font-weight:700;
+    white-space:nowrap;text-shadow:0 0 2px #1f4e79,0 0 3px #000,0 1px 2px #000;pointer-events:none}
+  .ofclbl::before{display:none}
+
 
   /* ---------- ポップアップ（詳細情報） ---------- */
   .pop h3{margin:0 0 6px;font-size:15px}
@@ -927,7 +935,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7.8 202609301849</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7.9 202609302129</span></h1>
     <div class="kpi" id="kpi"></div>
     <!-- v6.4：押すとGitHubに新しい版があるか確かめて、あれば切り替える -->
     <button id="bUpd" title="新しい版があれば切り替える">↻ 更新</button>
@@ -959,7 +967,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -975,6 +983,9 @@ const ENC = "UlFSMV/704cUP1miWytgPYRfQOp0YR+/q7IDRXi5yHg0WeC1K72o7hc2idMOf+GzVMj
 let APP_STARTED = false;   // 2回起動しないための目印
 function startApp(PLANTS){
 if(APP_STARTED) return; APP_STARTED = true;
+// v7.9：本社など発電所ではない拠点（kind:'office'）を分ける。PLANTS は発電所だけになる
+const OFFICES = PLANTS.filter(p=>p.kind==='office');
+PLANTS = PLANTS.filter(p=>p.kind!=='office');
 
 /* ---------- 危険度 → 色・説明の対応表 ---------- */
 const RISK = {
@@ -1123,6 +1134,26 @@ PLANTS.forEach(p=>{
     .bindTooltip(p.name.replace('発電所',''),{direction:'right',offset:[12,-22],className:'lbl'});
   m.on('click',()=>selectItem(p.no,false));
   markers[p.no] = m;
+});
+
+/* ============================================================
+   v7.9：本社（家のマーク）
+   ・発電所ではないので、件数・一覧・市町村ボタン・危険度の絞り込みの対象外。いつも表示する
+   ・タップすると名前・座標・Googleマップ／ルート検索
+   ============================================================ */
+const HOUSE = '<svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>';   // 家の形
+OFFICES.forEach(o=>{
+  const [lat,lng] = o.latlng;
+  const g  = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  const gr = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  L.marker(o.latlng,{
+      icon:L.divIcon({className:'', html:`<div class="ofc">${HOUSE}</div>`, iconSize:[34,34], iconAnchor:[17,17], popupAnchor:[0,-16]}),
+      zIndexOffset:900, title:o.name})
+    .bindPopup(`<div class="pop"><h3>🏠 ${o.name}</h3><table>
+        <tr><th>座標</th><td>${lat.toFixed(5)}, ${lng.toFixed(5)}</td></tr></table>
+        <div class="links"><a href="${g}" target="_blank">Googleマップ</a><a class="sub" href="${gr}" target="_blank">ルート検索</a></div></div>`,{maxWidth:300})
+    .bindTooltip(o.name,{permanent:true,direction:'right',offset:[16,0],className:'ofclbl'})
+    .addTo(map);
 });
 
 /* ============================================================
