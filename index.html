@@ -773,6 +773,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
     line-height:14px;text-align:center}
   .mk.sel{transform:scale(1.3)}
   .mk.small.sel{transform:scale(1.1)}
+  /* v7.1：地図の下の注釈（縮尺の上に出る） */
+  /* 目立たせない：小さめ・薄い背景・影なし（ユーザー指示） */
+  .mapnote{background:rgba(255,255,255,.55);color:#555;font-size:10px;line-height:1.3;padding:1px 6px;
+    border-radius:3px;pointer-events:none;max-width:70vw;margin-bottom:2px!important}
   .lbl{background:rgba(255,255,255,.92);border:1px solid #bbb;border-radius:4px;padding:1px 5px;
     font-size:11px;font-weight:bold;white-space:nowrap;box-shadow:none}
   .lbl::before{display:none}
@@ -901,7 +905,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7 202609301810</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7.1 202609301820</span></h1>
     <div class="kpi" id="kpi"></div>
     <!-- v6.4：押すとGitHubに新しい版があるか確かめて、あれば切り替える -->
     <button id="bUpd" title="新しい版があれば切り替える">↻ 更新</button>
@@ -931,7 +935,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -1005,6 +1009,11 @@ base['航空写真（Esri・速い）'].addTo(map);   // 既定＝航空写真
 overlay['道路・地名を重ねる'].addTo(map);
 L.control.layers(base, overlay, {collapsed:true}).addTo(map);
 L.control.scale({imperial:false}).addTo(map);  // 縮尺（m/km）
+// v7.1：地図の下に注釈（縮尺の上。左下は後から足したものが上に積まれる）
+const noteCtl = L.control({position:'bottomleft'});
+noteCtl.onAdd = ()=>{ const d = L.DomUtil.create('div','mapnote');
+  d.textContent = 'ピンの位置は発電所の入場フェンスの座標になります。'; return d; };
+noteCtl.addTo(map);
 L.control.zoom({position:'bottomright', zoomInTitle:'拡大', zoomOutTitle:'縮小'}).addTo(map);  // v6：右下（この上に現在地ボタンが乗る）
 
 /* ---------- 凡例（右下） ---------- */
