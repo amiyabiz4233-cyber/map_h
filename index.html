@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>発電所マップ</title>
+<!-- v6.2：iPhoneの「ホーム画面に追加」から開くと、アドレスバーなしの全画面で開く -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="発電所マップ">
+<meta name="theme-color" content="#2f6f4f">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADu0lEQVR42u3dwZEUMQxG4R3V5gOZQCYQCqEQCiFx2Ko9UMswQ3W39cvfu3LYaelJdruNffv07csL8BElBCAHyAFygBwgB8gBcoAcIAfIAZAD5AA5QA6QA+QAOUAOkAPkAMgBcuD/ed354X/9+HnnXz9//6pzAOQAOUAOkAPkADlADpAD5AA5AHKAHCAHdpDj/gd07CvHmxmb+9Ht8atbULb1o2F5VMNy2dCPnuVR3czY0I+25VENzdjKj87lUT3N2MSP5uVRbc0Y70f/8ritulLjqcee978EIh5/2bDy1AMP6x8phbFyQrqnH0Etc/Gr7G5+ZA2m6xfB9vEjbprVYvl8Bz8SJ+BdPrzN9iP01azRJ/upfuS+tPfa7PN4aFJWPqKXc9rtBHskQEFrYtG6V1xA41ZLc3WvrICGrqOH6l5BAY3+wpKo+635XfbvE7qTgvjPCeOxf/ePP9dc9+5yvAX01Axd/DZxtu57ydFBi2MVOVx3cix2YszseMKEtLkZLxvsYpzcOS5L3tQWUszQQvaS4/psjfSjmMGPXeRYm6FhfhQz+DFfjj5ZGeNHMYMfk+XomYkBfjgTDHPl6Fyg6c2jmMEPwwrIAXIEdezckUXnwDg5ssoxtHnoHCAHyIEDOWwP6ZW7/kOH8Litpq/qY+Ts9RARDSsgB8gBcoAcIAfIAXJgCoctgo0/rGJDUo9giFtBTywewwrIAXKAHGFDeOhsXefARDlSyjH3JV/nADmwmxz9O3b0wnF85+gc/fRPCoYVjJajZ4EO+BI5pHN0y8SMb9RzhpU++Rize2HUnKNDVibta5k2IV2bm2E7nga+razK0Ly9cDNfZa/P08hdkmPXOa7M1tT9s/MvADx1t+nsbdU1PsHn5W/8hvuMS4ePSkafoy8irpaNua782MSsbRUpl1K3luPDLF58dfnh+Qu6zr6vHHfSljvYX6D7/Anp/YIOPTDubz+77eNUnBmhfiTqXolmxPkRqnuFmhE088jVvZhxNk/91FZ+FDP40VqO2Wbk+lHM4EdTOfYxI9GPYgY/2smxpxlZflT/AI3cNhHhx+IPb9d/FH32N5z6Ax7M+qryqM4FNH6r1SMPuDAI1TZAm5x627k8qmeAtjoPuW15VMMAbXhSds/yqG4B2vYM9YblUc0LaEM/+gTByT4vyoMcIAfIAXKAHCAHyAFygBwgB0AOkAPkADlADrRi/iG10DlADpAD5AA5QA6QA+QAOYQA5AA5QA6QA+QAOUAOkAPkADkAcoAcIAdO5DdOlJ4eP3w27wAAAABJRU5ErkJggg==">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADu0lEQVR42u3dwZEUMQxG4R3V5gOZQCYQCqEQCiFx2Ko9UMswQ3W39cvfu3LYaelJdruNffv07csL8BElBCAHyAFygBwgB8gBcoAcIAfIAZAD5AA5QA6QA+QAOUAOkAPkAMgBcuD/ed354X/9+HnnXz9//6pzAOQAOUAOkAPkADlADpAD5AA5AHKAHCAHdpDj/gd07CvHmxmb+9Ht8atbULb1o2F5VMNy2dCPnuVR3czY0I+25VENzdjKj87lUT3N2MSP5uVRbc0Y70f/8ritulLjqcee978EIh5/2bDy1AMP6x8phbFyQrqnH0Etc/Gr7G5+ZA2m6xfB9vEjbprVYvl8Bz8SJ+BdPrzN9iP01azRJ/upfuS+tPfa7PN4aFJWPqKXc9rtBHskQEFrYtG6V1xA41ZLc3WvrICGrqOH6l5BAY3+wpKo+635XfbvE7qTgvjPCeOxf/ePP9dc9+5yvAX01Axd/DZxtu57ydFBi2MVOVx3cix2YszseMKEtLkZLxvsYpzcOS5L3tQWUszQQvaS4/psjfSjmMGPXeRYm6FhfhQz+DFfjj5ZGeNHMYMfk+XomYkBfjgTDHPl6Fyg6c2jmMEPwwrIAXIEdezckUXnwDg5ssoxtHnoHCAHyIEDOWwP6ZW7/kOH8Litpq/qY+Ts9RARDSsgB8gBcoAcIAfIAXJgCoctgo0/rGJDUo9giFtBTywewwrIAXKAHGFDeOhsXefARDlSyjH3JV/nADmwmxz9O3b0wnF85+gc/fRPCoYVjJajZ4EO+BI5pHN0y8SMb9RzhpU++Rize2HUnKNDVibta5k2IV2bm2E7nga+razK0Ly9cDNfZa/P08hdkmPXOa7M1tT9s/MvADx1t+nsbdU1PsHn5W/8hvuMS4ePSkafoy8irpaNua782MSsbRUpl1K3luPDLF58dfnh+Qu6zr6vHHfSljvYX6D7/Anp/YIOPTDubz+77eNUnBmhfiTqXolmxPkRqnuFmhE088jVvZhxNk/91FZ+FDP40VqO2Wbk+lHM4EdTOfYxI9GPYgY/2smxpxlZflT/AI3cNhHhx+IPb9d/FH32N5z6Ax7M+qryqM4FNH6r1SMPuDAI1TZAm5x627k8qmeAtjoPuW15VMMAbXhSds/yqG4B2vYM9YblUc0LaEM/+gTByT4vyoMcIAfIAXKAHCAHyAFygBwgB0AOkAPkADlADrRi/iG10DlADpAD5AA5QA6QA+QAOYQA5AA5QA6QA+QAOUAOkAPkADkAcoAcIAdO5DdOlJ4eP3w27wAAAABJRU5ErkJggg==">
 <meta name="robots" content="noindex,nofollow">
 <!--
   ============================================================
@@ -706,7 +714,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     font-family:"Yu Gothic UI","Meiryo","Hiragino Sans",sans-serif;font-size:14px}
 
   /* ---------- 全体レイアウト：上ヘッダー / 左リスト / 右地図 ---------- */
-  .app{display:grid;grid-template-rows:auto 1fr;grid-template-columns:360px 1fr;height:100vh}
+  .app{display:grid;grid-template-rows:auto 1fr;grid-template-columns:360px 1fr;height:100vh;height:100dvh}
   header{grid-column:1/3;background:var(--accent);color:#fff;padding:10px 16px;
     display:flex;align-items:center;gap:18px;flex-wrap:wrap}
   header h1{font-size:18px;margin:0;letter-spacing:.05em}
@@ -833,13 +841,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
   /* ---------- スマホ幅：地図を大きく、下のメニューは開閉式 ---------- */
   @media (max-width:760px){
-    .app{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
+    /* v6.2：メニューは見出しのすぐ下（画面の下はiPhoneのSafariのアドレスバーとかぶるため） */
+    .app{grid-template-columns:1fr;grid-template-rows:auto auto 1fr}
     header{grid-column:1;padding:6px 12px}
     header h1{font-size:15px}
     .kpi{display:none}                                   /* 集計値は隠す（PCでは出る） */
-    aside{order:3;border-right:none;border-top:1px solid var(--line);max-height:44px;overflow:hidden}
+    aside{order:2;border-right:none;border-bottom:1px solid var(--line);max-height:44px;overflow:hidden}
+    #map{order:3}
     aside.open{max-height:58vh}                          /* 開いたとき：画面の6割まで */
     #sheetBtn{display:block;flex:0 0 auto}
+    body.ios-browser .leaflet-bottom{margin-bottom:64px}   /* v6.2：Safariの浮いたアドレスバーの上に出す */
     .leaflet-control-zoom{display:none}                  /* スマホは指で拡大するので＋−は隠す（Googleマップと同じ） */
     .legend .lg-b{display:none}                          /* 凡例は見出しだけ */
     .legend.open .lg-b{display:block}
@@ -871,13 +882,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v6 202609301748</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v6.2 202609301752</span></h1>
     <div class="kpi" id="kpi"></div>
   </header>
 
   <aside id="sheet">
-    <!-- スマホだけ表示：押すと検索・一覧が開く／閉じる -->
-    <button id="sheetBtn">▲ 検索・一覧を開く</button>
+    <!-- スマホだけ表示：押すと検索・一覧が開く／閉じる（v6.2：見出しのすぐ下に出る） -->
+    <button id="sheetBtn">▼ 検索・一覧を開く</button>
     <div class="tools">
       <!-- 名前・住所・番号・プロバイダ・IPのどれでも部分一致で検索 -->
       <input id="q" type="search" placeholder="検索（名前・住所・IP・プロバイダ）">
@@ -899,7 +910,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -1404,12 +1415,20 @@ if(GPS_OK && navigator.permissions && navigator.permissions.query){
   }).catch(()=>{});
 }
 
+/* ---------- v6.2：iPhoneのSafariで開いているか（ホーム画面から開いたアプリは除く） ----------
+   Safariで開くと画面の下にアドレスバーが浮いて、右下のボタンが隠れるので、body に印を付けて上へずらす */
+(function(){
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  const standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  if(ios && !standalone) document.body.classList.add('ios-browser');
+})();
+
 /* ---------- スマホ：下のメニューの開閉 ---------- */
 const $sheet = document.getElementById('sheet');
 const isMobile = ()=>window.matchMedia('(max-width:760px)').matches;
 function setSheet(open){
   $sheet.classList.toggle('open', open);
-  document.getElementById('sheetBtn').textContent = open ? '▼ 閉じて地図を広く' : '▲ 検索・一覧を開く';
+  document.getElementById('sheetBtn').textContent = open ? '▲ 閉じて地図を広く' : '▼ 検索・一覧を開く';
   // 地図の高さが変わるので、Leafletに伝える（伝えないと灰色の余白が出る）
   setTimeout(()=>map.invalidateSize(), 50);
 }
