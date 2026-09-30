@@ -797,6 +797,30 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .gpsbtn.on{background:#e8f0fe}
   .legend .lg-h{cursor:pointer}
 
+  /* ---------- GPSが使えないときの帯（地図の上端） ---------- */
+  #gpsBar{position:absolute;top:8px;left:56px;right:56px;z-index:1000;display:none;
+    background:#fff4e5;border:1px solid #f2b366;color:#7a4a00;border-radius:8px;padding:7px 10px;
+    font-size:13px;align-items:center;gap:8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+  #gpsBar .t{flex:1;line-height:1.35}
+  #gpsBar button{border:1px solid #d98b1f;background:#fff;color:#7a4a00;border-radius:6px;padding:5px 9px;font-size:13px;cursor:pointer;white-space:nowrap}
+  #gpsBar .x{border:none;background:none;font-size:18px;padding:0 4px}
+  /* ---------- 設定方法の画面 ---------- */
+  #gpsHelp{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:4500;display:none;align-items:center;justify-content:center;padding:14px}
+  #gpsHelp .box{background:#fff;border-radius:10px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;padding:16px}
+  #gpsHelp h2{margin:0 0 4px;font-size:17px}
+  #gpsHelp .sub{font-size:12px;color:#5d6660;margin-bottom:10px}
+  #gpsHelp .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+  #gpsHelp .tabs button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:4px 10px;font-size:12px;cursor:pointer}
+  #gpsHelp .tabs button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  #gpsHelp ol{margin:0;padding-left:22px;line-height:1.7;font-size:14px}
+  #gpsHelp li{margin-bottom:6px}
+  #gpsHelp b.k{background:#eef4f0;padding:0 4px;border-radius:3px}
+  #gpsHelp .foot{display:flex;gap:8px;margin-top:14px}
+  #gpsHelp .foot button{flex:1;padding:10px;font-size:15px;border-radius:6px;cursor:pointer}
+  #gpsHelp .retry{background:var(--accent);color:#fff;border:none}
+  #gpsHelp .close{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+  #map{position:relative}
+
   /* ---------- スマホ幅：地図を大きく、下のメニューは開閉式 ---------- */
   @media (max-width:760px){
     .app{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
@@ -823,9 +847,20 @@ svg.leaflet-image-layer.leaflet-interactive path {
   <div class="msg" id="lockMsg"></div>
 </div></div>
 <div id="toast"></div>
+<!-- 位置情報の設定方法（GPSが使えないとき [設定方法] で開く） -->
+<div id="gpsHelp"><div class="box">
+  <h2>📍 現在地を表示するには</h2>
+  <div class="sub" id="gpsHelpWhy"></div>
+  <div class="tabs" id="gpsTabs"></div>
+  <ol id="gpsSteps"></ol>
+  <div class="foot">
+    <button class="retry" id="gpsRetry">設定したので もう一度試す</button>
+    <button class="close" id="gpsClose">閉じる</button>
+  </div>
+</div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v4</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v5 202609301742</span></h1>
     <div class="kpi" id="kpi"></div>
   </header>
 
@@ -853,7 +888,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -1129,7 +1164,8 @@ document.getElementById('kpi').innerHTML =
    ・勝手に現在地へ地図を動かすことはしない（見ている場所が飛ぶと使いにくいため）
    ============================================================ */
 let meMarker = null, meCircle = null;
-let gpsErr = null;          // 最後に失敗した理由（📍を押したときに見せる）
+let gpsErr = null;
+let watchIdBoot = null;   // 起動時の watchPosition の番号          // 最後に失敗した理由（📍を押したときに見せる）
 let gpsWantCenter = false;  // 📍を押して「取れたらそこへ移動」を待っている状態
 const GPS_OK = ('geolocation' in navigator) && window.isSecureContext;
 (function startGps(){
@@ -1151,6 +1187,7 @@ const GPS_OK = ('geolocation' in navigator) && window.isSecureContext;
       meMarker.setLatLng(ll); meCircle.setLatLng(ll).setRadius(acc);
     }
     gpsErr = null;
+    if(window.hideGpsBar) hideGpsBar();   // v5：取れたら帯を消す
     // 📍を押して待っていたら、取れた時点でそこへ移動
     if(gpsWantCenter){ gpsWantCenter = false; map.setView(ll, Math.max(map.getZoom(),15)); }
   }
@@ -1159,17 +1196,21 @@ const GPS_OK = ('geolocation' in navigator) && window.isSecureContext;
   function onErr(e){
     gpsErr = e;
     if(gpsWantCenter){ gpsWantCenter = false; toast(gpsMsg(e)); }
+    // v5：拒否(1)・取得不可(2)なら地図の上に帯を出す（時間切れ(3)は電波待ちなので出さない）
+    if(e && (e.code===1 || e.code===2) && window.showGpsBar)
+      showGpsBar(e.code===1 ? '📍 現在地が使えません' : '📍 現在地を取得できません');
   }
+  window.__gpsOnErr = onErr;
 
   // watchPosition：動くと自動で更新される。maximumAge で5秒以内の値は使い回して電池を節約
   window.__gpsOnPos = onPos;   // 📍ボタンの取り直しからも同じ処理を使う
-  navigator.geolocation.watchPosition(onPos, onErr, {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
+  watchIdBoot = navigator.geolocation.watchPosition(onPos, onErr, {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
 })();
 // 取れない理由を日本語に
 function gpsMsg(e){
   if(!GPS_OK) return 'このページでは現在地を使えません（https で開いたときだけ使えます）';
-  if(e && e.code===1) return '位置情報が許可されていません。iPhoneの「設定 → プライバシーとセキュリティ → 位置情報サービス → Safari（Webサイト）」を「使用中のみ」にして、ページを開き直してください';
-  if(e && e.code===2) return '現在地を取得できませんでした（屋内・電波の弱い場所など）';
+  if(e && e.code===1) return '位置情報がオフ、またはこのページに許可されていません。下の手順で設定してください';
+  if(e && e.code===2) return '現在地を取得できませんでした（位置情報サービスがオフ、または屋内・電波の弱い場所）';
   if(e && e.code===3) return '現在地の取得に時間がかかっています。少し待ってからもう一度押してください';
   return '現在地を探しています…';
 }
@@ -1190,7 +1231,7 @@ gpsCtl.onAdd = ()=>{
   gpsBtn.onclick = ()=>{
     if(meMarker){ map.setView(meMarker.getLatLng(), Math.max(map.getZoom(),15)); return; }
     if(!GPS_OK){ toast(gpsMsg(null)); return; }
-    if(gpsErr && gpsErr.code===1){ toast(gpsMsg(gpsErr)); return; }   // 拒否済みは聞き直せない
+    if(gpsErr && (gpsErr.code===1 || gpsErr.code===2)){ showGpsHelp(gpsMsg(gpsErr)); return; }   // v5：拒否済みは聞き直せないので設定方法を出す
     // まだ取れていない：押したのをきっかけにもう一度取りに行く（iPhoneはタップ起点だと許可画面が出やすい）
     gpsWantCenter = true; toast('現在地を探しています…');
     navigator.geolocation.getCurrentPosition(p=>{ /* watchPosition 側の onPos と同じ処理 */
@@ -1207,6 +1248,132 @@ gpsCtl.addTo(map);
    地図のピンチはLeafletが touch イベントで処理しているので影響しない。 */
 ['gesturestart','gesturechange','gestureend'].forEach(ev=>
   document.addEventListener(ev, e=>e.preventDefault(), {passive:false}));
+
+/* ============================================================
+   v5：GPSが使えないことを検知して、設定方法を案内する
+   ------------------------------------------------------------
+   ・検知のきっかけ
+       ① 起動時の watchPosition が「拒否(code 1)」で返ってきた
+       ② Permissions API で状態が denied（Chrome・Safari 16以降）
+   ・「位置情報を許可しますか？」の本物の画面はブラウザが出すもの。
+     まだ一度も聞かれていなければ、起動時に自動で出る。
+     一度「許可しない」を選ぶと、ページからはもう出せない → 設定手順を見せる
+   ・帯の × を押したら、その回は出さない（次に開いたときはまた出る）
+   ============================================================ */
+
+// ---- どの端末・ブラウザで開いているか ----
+function detectEnv(){
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  if(ios && /CriOS/.test(ua)) return 'ios_chrome';
+  if(ios) return 'ios_safari';               // ホーム画面に追加したアプリも Safari 扱い
+  if(/Android/.test(ua)) return 'android';
+  return 'pc';
+}
+
+// ---- 端末ごとの手順（画面に出す文言） ----
+const GPS_GUIDE = {
+  ios_safari:{ tab:'iPhone（Safari）', steps:[
+    'iPhoneの <b class="k">設定</b> → <b class="k">プライバシーとセキュリティ</b> → <b class="k">位置情報サービス</b> を <b>オン</b> にする',
+    '同じ画面を下へ進み、<b class="k">Safari Webサイト</b> → <b class="k">このAppの使用中</b>（または「次回または共有時に確認」）を選ぶ。<b class="k">正確な位置情報</b> もオン',
+    'このページに戻り、アドレスバー左の <b class="k">ぁあ</b>（または <b class="k">…</b>）→ <b class="k">Webサイトの設定</b> → <b class="k">位置情報</b> を <b>確認</b> か <b>許可</b> にする',
+    'ページを開き直す（アドレスバーの ↻）。「位置情報の使用を許可しますか？」が出たら <b>許可</b>'
+  ]},
+  ios_chrome:{ tab:'iPhone（Chrome）', steps:[
+    'iPhoneの <b class="k">設定</b> → <b class="k">プライバシーとセキュリティ</b> → <b class="k">位置情報サービス</b> を <b>オン</b> にする',
+    '同じ画面を下へ進み、<b class="k">Chrome</b> → <b class="k">このAppの使用中</b> を選ぶ。<b class="k">正確な位置情報</b> もオン',
+    'Chromeに戻ってページを再読み込みする。「位置情報の使用を許可しますか？」が出たら <b>許可</b>',
+    'それでも出ないとき：Chromeの <b class="k">…</b> → <b class="k">設定</b> → <b class="k">コンテンツの設定</b>（プライバシー）で位置情報がブロックされていないか確認'
+  ]},
+  android:{ tab:'Android（Chrome）', steps:[
+    '画面の上から下へなぞって、クイック設定の <b class="k">位置情報</b> を <b>オン</b> にする',
+    'Chromeのアドレスバー左の <b class="k">調整アイコン（または鍵）</b> → <b class="k">権限</b> → <b class="k">位置情報</b> を <b>許可</b> にする',
+    '出てこないとき：スマホの <b class="k">設定</b> → <b class="k">アプリ</b> → <b class="k">Chrome</b> → <b class="k">権限</b> → <b class="k">位置情報</b> → <b>アプリの使用中のみ許可</b>',
+    'ページを再読み込みする'
+  ]},
+  pc:{ tab:'PC（Chrome・Edge）', steps:[
+    'アドレスバー左の <b class="k">調整アイコン（または鍵）</b> → <b class="k">位置情報</b> を <b>許可</b> にする',
+    'Windowsの <b class="k">設定</b> → <b class="k">プライバシーとセキュリティ</b> → <b class="k">位置情報</b> → <b class="k">位置情報サービス</b> と <b class="k">アプリに位置情報へのアクセスを許可する</b> を <b>オン</b>',
+    'ページを再読み込みする',
+    '※ PCはGPSが無いので、Wi-Fiなどからの大まかな位置になります（数百m〜数kmずれることがあります）'
+  ]}
+};
+const GPS_ENV = detectEnv();
+
+// ---- 設定方法の画面 ----
+function showGpsHelp(why){
+  document.getElementById('gpsHelpWhy').textContent = why || '位置情報がオフ、またはこのページに許可されていません。';
+  const tabs = document.getElementById('gpsTabs'); tabs.innerHTML = '';
+  // 開いている端末のタブを先頭に
+  const order = [GPS_ENV].concat(Object.keys(GPS_GUIDE).filter(k=>k!==GPS_ENV));
+  function draw(k){
+    tabs.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.k===k));
+    document.getElementById('gpsSteps').innerHTML = GPS_GUIDE[k].steps.map(s=>'<li>'+s+'</li>').join('');
+  }
+  order.forEach(k=>{
+    const b = document.createElement('button'); b.dataset.k = k;
+    b.textContent = GPS_GUIDE[k].tab + (k===GPS_ENV ? '（この端末）' : '');
+    b.onclick = ()=>draw(k); tabs.appendChild(b);
+  });
+  draw(GPS_ENV);
+  document.getElementById('gpsHelp').style.display = 'flex';
+}
+function hideGpsHelp(){ document.getElementById('gpsHelp').style.display = 'none'; }
+document.getElementById('gpsClose').onclick = hideGpsHelp;
+document.getElementById('gpsHelp').onclick = e=>{ if(e.target.id==='gpsHelp') hideGpsHelp(); };  // 外側を押しても閉じる
+
+// ---- 地図の上の帯 ----
+let gpsBarClosed = false;   // × を押したらこの回は出さない
+const $gpsBar = document.createElement('div');
+$gpsBar.id = 'gpsBar';
+$gpsBar.innerHTML = '<span class="t">📍 現在地が使えません</span><button class="h">設定方法</button><button class="x" title="閉じる">×</button>';
+document.getElementById('map').appendChild($gpsBar);
+L.DomEvent.disableClickPropagation($gpsBar);
+$gpsBar.querySelector('.h').onclick = ()=>showGpsHelp();
+$gpsBar.querySelector('.x').onclick = ()=>{ gpsBarClosed = true; $gpsBar.style.display = 'none'; };
+function showGpsBar(text){
+  if(gpsBarClosed || meMarker) return;
+  if(text) $gpsBar.querySelector('.t').textContent = text;
+  $gpsBar.style.display = 'flex';
+}
+function hideGpsBar(){ $gpsBar.style.display = 'none'; }
+window.showGpsBar = showGpsBar; window.hideGpsBar = hideGpsBar;
+
+// ---- 「もう一度試す」：取り直す。取れたら帯と画面を消して現在地へ ----
+function retryGps(){
+  if(!GPS_OK) return;
+  toast('現在地を探しています…');
+  navigator.geolocation.getCurrentPosition(p=>{
+      gpsWantCenter = true; window.__gpsOnPos && window.__gpsOnPos(p);
+      hideGpsHelp(); hideGpsBar(); toast('現在地を表示しました');
+      restartWatch();
+    }, e=>{ gpsErr = e;
+      document.getElementById('gpsHelpWhy').textContent = 'まだ取れません：' + gpsMsg(e);
+      toast(gpsMsg(e)); },
+    {enableHighAccuracy:true, maximumAge:0, timeout:15000});
+}
+document.getElementById('gpsRetry').onclick = retryGps;
+
+// 拒否から許可に変わったあとは watchPosition を張り直さないと追従しない
+let watchId = null;
+function restartWatch(){
+  if(!GPS_OK || !window.__gpsOnPos) return;
+  if(watchId !== null) navigator.geolocation.clearWatch(watchId);
+  if(watchIdBoot !== null){ navigator.geolocation.clearWatch(watchIdBoot); watchIdBoot = null; }
+  watchId = navigator.geolocation.watchPosition(window.__gpsOnPos, window.__gpsOnErr,
+            {enableHighAccuracy:true, maximumAge:5000, timeout:20000});
+}
+
+// ---- Permissions API：許可の状態を見張る（対応ブラウザだけ） ----
+if(GPS_OK && navigator.permissions && navigator.permissions.query){
+  navigator.permissions.query({name:'geolocation'}).then(st=>{
+    if(st.state === 'denied') showGpsBar();
+    st.onchange = ()=>{
+      if(st.state === 'granted'){ hideGpsBar(); restartWatch(); }   // 設定を直して戻ってきた
+      else if(st.state === 'denied') showGpsBar();
+    };
+  }).catch(()=>{});
+}
 
 /* ---------- スマホ：下のメニューの開閉 ---------- */
 const $sheet = document.getElementById('sheet');
