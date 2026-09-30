@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>発電所マップ</title>
 <!-- v6.2：iPhoneの「ホーム画面に追加」から開くと、アドレスバーなしの全画面で開く -->
+<meta name="format-detection" content="telephone=no">   <!-- v6.3：版の日時(12桁)が電話番号リンクにならないように -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -718,6 +719,15 @@ svg.leaflet-image-layer.leaflet-interactive path {
   header{grid-column:1/3;background:var(--accent);color:#fff;padding:10px 16px;
     display:flex;align-items:center;gap:18px;flex-wrap:wrap}
   header h1{font-size:18px;margin:0;letter-spacing:.05em}
+  /* v6.4：右上の更新ボタン（見出しの帯の右端） */
+  #bUpd{margin-left:auto;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.6);
+    border-radius:16px;padding:4px 12px;font-size:13px;cursor:pointer;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  #bUpd:active{background:rgba(255,255,255,.3)}
+  #bUpd:disabled{opacity:.6}
+  /* v6.3：版数・日時の部分は押しても何も起きないようにする
+     （iPhoneが12桁の数字を電話番号と勘違いして発信メニューを出すのを二重に止める） */
+  header h1 span{pointer-events:none;-webkit-user-select:none;user-select:none}
+  header a[href^="tel"]{color:inherit!important;text-decoration:none!important;pointer-events:none}
   .kpi{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;opacity:.95}
   .kpi b{font-size:16px;margin-left:4px}
   aside{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
@@ -850,7 +860,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
     #map{order:3}
     aside.open{max-height:58vh}                          /* 開いたとき：画面の6割まで */
     #sheetBtn{display:block;flex:0 0 auto}
-    body.ios-browser .leaflet-bottom{margin-bottom:64px}   /* v6.2：Safariの浮いたアドレスバーの上に出す */
+    body.ios-browser .locbtn{margin-bottom:64px!important}   /* v6.3：現在地ボタンだけアドレスバーの上へ。縮尺・著作権表示は最下段（隠れてもよい） */
     .leaflet-control-zoom{display:none}                  /* スマホは指で拡大するので＋−は隠す（Googleマップと同じ） */
     .legend .lg-b{display:none}                          /* 凡例は見出しだけ */
     .legend.open .lg-b{display:block}
@@ -882,8 +892,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v6.2 202609301752</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v6.4 202609301805</span></h1>
     <div class="kpi" id="kpi"></div>
+    <!-- v6.4：押すとGitHubに新しい版があるか確かめて、あれば切り替える -->
+    <button id="bUpd" title="新しい版があれば切り替える">↻ 更新</button>
   </header>
 
   <aside id="sheet">
@@ -910,7 +922,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -1421,6 +1433,45 @@ if(GPS_OK && navigator.permissions && navigator.permissions.query){
   const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   const standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
   if(ios && !standalone) document.body.classList.add('ios-browser');
+})();
+
+/* ============================================================
+   v6.4：右上の「更新」ボタン
+   ------------------------------------------------------------
+   ・押すと GitHub 上の index.html を取りに行き、見出しの作成日時（12桁）を比べる
+       新しい版がある → その版に切り替える（ページを読み直す）
+       同じ版         → 「最新版です」と出すだけ
+       通信できない   → 「確認できませんでした」
+   ・URL に ?t=今の時刻 を付けて取りに行く
+       → GitHub の配信側に残っている古いコピー（最大10分）を使わせないため
+   ・ファイルとして開いた社内版（file://）では取りに行く先が無いのでボタンを出さない
+   ============================================================ */
+(function(){
+  const btn = document.getElementById('bUpd');
+  if(location.protocol === 'file:'){ btn.style.display = 'none'; return; }
+  // 今開いている版の作成日時（見出しの「v6.4 202609301805」の12桁）
+  const myStamp = ((document.querySelector('header h1 span')||{}).textContent || '').match(/(\d{12})/);
+  btn.onclick = async ()=>{
+    btn.disabled = true; btn.textContent = '確認中…';
+    try{
+      const res = await fetch(location.pathname + '?t=' + Date.now(), {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const html = await res.text();
+      // 取りに行った版の作成日時（見出しの中の v番号 の後ろの12桁）
+      const m = html.match(/opacity:\.7">v[\d.]+ (\d{12})</);
+      const newStamp = m ? m[1] : null;
+      if(newStamp && myStamp && newStamp > myStamp[1]){
+        toast('新しい版（' + newStamp + '）に切り替えます');
+        // ?v=新しい日時 を付けて読み直す（古いコピーを避ける）。パスワードは端末に保存済みなので聞かれない
+        setTimeout(()=>location.replace(location.pathname + '?v=' + newStamp), 600);
+        return;
+      }
+      toast('最新版です（' + (myStamp ? myStamp[1] : '版不明') + '）');
+    }catch(e){
+      toast('確認できませんでした（電波・通信を確認してください）');
+    }
+    btn.disabled = false; btn.textContent = '↻ 更新';
+  };
 })();
 
 /* ---------- スマホ：下のメニューの開閉 ---------- */
