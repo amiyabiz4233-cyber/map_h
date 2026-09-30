@@ -758,12 +758,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .tag{font-size:11px;color:var(--sub);text-align:right;line-height:1.4}
   .tag .dmg{color:var(--riskA);font-weight:bold}
 
-  /* ---------- 地図上のマーカー（丸数字ピン） ---------- */
-  .pin{width:30px;height:30px;border-radius:50%;color:#fff;font-weight:bold;font-size:13px;
-    display:flex;align-items:center;justify-content:center;border:2px solid #fff;
-    box-shadow:0 0 0 1px rgba(0,0,0,.5)}
-  .pin.dmg{border-color:#ffe600;border-width:3px} /* 被害3回以上は外枠を黄色で強調（航空写真上でも目立つ色） */
-  .pin.riskC{color:#3a3000}
+  /* ---------- 地図上のマーカー（v7：Googleマップ風のしずく型ピン） ----------
+     ・ピンの色＝危険度、中の数字＝一覧の番号
+     ・右上の黒い小丸＝被害回数（3回以上のときだけ出す）
+     ・選んだピンは少し大きくなる */
+  .mk{position:relative;width:30px;height:40px;transition:transform .12s ease-out;transform-origin:50% 100%}
+  .mk svg{position:absolute;inset:0;z-index:1;width:30px;height:40px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}
+  .mk-n{position:absolute;z-index:2;top:5px;left:0;width:30px;text-align:center;color:#fff;font-weight:700;
+    font-size:13px;line-height:20px;letter-spacing:-.5px;font-family:"Segoe UI","Hiragino Sans",sans-serif}
+  .mk.riskC .mk-n{color:#3a3000}
+  .mk.small{transform:scale(.82)}                 /* 低圧(D)は少し小さく */
+  .mk-b{position:absolute;z-index:3;top:-6px;right:-7px;min-width:17px;height:17px;padding:0 3px;box-sizing:border-box;
+    border-radius:9px;background:#1f2421;color:#ffd400;border:1.5px solid #fff;font-size:10px;font-weight:700;
+    line-height:14px;text-align:center}
+  .mk.sel{transform:scale(1.3)}
+  .mk.small.sel{transform:scale(1.1)}
   .lbl{background:rgba(255,255,255,.92);border:1px solid #bbb;border-radius:4px;padding:1px 5px;
     font-size:11px;font-weight:bold;white-space:nowrap;box-shadow:none}
   .lbl::before{display:none}
@@ -892,7 +901,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v6.4 202609301805</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7 202609301810</span></h1>
     <div class="kpi" id="kpi"></div>
     <!-- v6.4：押すとGitHubに新しい版があるか確かめて、あれば切り替える -->
     <button id="bUpd" title="新しい版があれば切り替える">↻ 更新</button>
@@ -922,7 +931,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "UlFSMZt4o5y37Agnni66LtKDUazxgSBBuDGD+nga6U40gFM599Kq3zs4uIs/RJaPXMU0JiNb/fKyeEBLq8z3Hp5MZUHB4l6MuYWdmUdzeOapKOrGJk28v2NZa7F2qUfjYqQ6kE1m6v+Q96z4CWi3ohdoYc4S47DlmHN1CZ5hA+RAtqBaekH7U6lFpg5TiEyPJzu4nbNpb+rxkKV1WuYn8iUkw4VSM5hBm6SNK4Aabg+AXCmaB9BWmGwu/Bccd1IWRVa3IgW9xLwTjtWV394t8oMAcMGkgXHNwepUm8Fn4XcT1G+OP+YnvFubz5ixtC6dhoK8cpYPEo1oLY6boUMF9gu5wEFb7SSkP1AdWwFQ0XKZHPTQC3PghgOdYSR0g0Cbor3RM1m/wA2XoA+SFTwfzVChibiu3gyduir59zNq1MyZbuIUD5MTRrtHTBaKxzMR6BNs+q9Oj8Bscwex2sDZEA3S03vRlsm9Rxq26a3WP+3Ypnb47G2DiDLC9ejLvHjl7JA07hG39OMqoLvz8q6elQeFhTP6FpRifp0MgFzwpvUYyzfzF/NBWLQnkNDIJ1LCZUB4lfFAWUQeT3cCK4X1hNhHQZ0zGE9lTdiF61qu0BfdkffYY17zG33gM3z2Yyl4AJAKgl+FfNxS98cSs58Y20L7BkCkmryyEVXM9Dv6ZHoOseojLy6HXBRxAzuJ6ygp64bQ+CFxwm4LLMlzIZIj7b9l/MyzwqWsQNI5BRQ3JMZHab56HhKtrP9JuI+sQkZomvPPI21qcRlt7ahSxQ3hzCZ/VArVLPAsAyl5IH4DY0Pd6k5yU89bTxxg58LNnQTzbpQIjSzf3oMGfb0KgghxpmPwHNWOfIjsDWzAqG7TOdcqmcklNfI4L7ov1PA7FDBLXgBqHcMhT5O6XRyRcWks9uH3SaGUFaqi94IRn7+DGfwlAvFdJLUaX9P3FUziUusvBSKBROc5NOk1vE9V2i2ZaM1eLwJVuGal8TOItEDsYcJlnNMj7EWvnKlLozNA7HGHanv1a1XTr//hkjCYoQQC8QqxASzQlCGZLxZIpZUtyRwQZhAcmEEIGsDmixizxSb6zzPtiXTrBPync+zx48H3wSmIGhDI46yPW19t2pLwEV8UA5X96jVmnwGv3gBVcEEiod3Wz3UphVaZhjbDoY/TG/ujaZsMlN/h54teKG1CVTkhzkDjziKRnOstOsd0Kg3hltmuFAruS5bpU2E+v/97xUrpKwcEimu8BlI7FD9u1Ac1kkG5qLeFxCFLO/zh1X9WTmJfpciJy7UuMqeycPqyW6HxUPCpZmMZGGqDGJUCI1QSfAoF4aOlmJfeynUw0ZY0bVY2FiAkyv5M7JthEE80pcOd3UzUf92HfYF6K5Yhc46tdaqqi3VmCRM62iHBS/qwezOSQORgDf/eVdXqo0SiJTkfEUU7S0wrulpRPnpvRqOCphnnv8lAugVXZkoZYxo2pVk0MT1Tn5xWZw1ySUseg7EzHmfsh1mG/kykuI9g+lvJDzUB2v3ppB/Q+P2YhvD8QqvF2bojwutTQ3eLXYM2ZkVNXzUlF2R4MEhVf3c2mcrsLRVSm3velE7GuC2IIfrL3Ga/xNgum0gzssChCbr4pHm4RhSGlob1D62dsXhdaIXy8RNwg/R0+zWXB3VsW7V7Br/HZJb+liAKcYq0/5uzsHZnQCroOWg3mXi1zUWqaldNRURdcrmOK1ZcILIf8eObvvRyF2yk06GLRoF0EjYNqMMF2kyKNTOdOvPnMuOBZPaIydu9v6QuB3Gxqmda/lXoiu55frJ02ml4ORKBU3iJKxm/Dar5ZjR0Y0kd7DWmIZ+mDOTbCjQ7etE0CDrj7hVlnvsO3dG5EQpnKblvXBt9/Tt67ULJnb/Nx5uzlzdYZLHFc75VuA0zb9ZCtMRQcLdImN311sc8k/8Y1pUNBuQz2V+81OolJ++VImadu2sp+OqhCzzHgJhh1LZd0MBZS0b+Nli+IzFngTRdMo41JCQ8MMpIIDjOMWIwBLRGpSi0J11+m8jdWNaxNkcwBscohuGEukHCQxLxjz7pmSylr/GMxcWJlzH9nQYopETyCZS9bk8szgnEf/h3e2sSJ1MCtP1FhziqoUd8sll/Ma/3LJLkN76PmaRuZbjuBLDrw9+Hz+MeQdB/C55sZ3cCPS6VmDNPEpPYSGIGuNWH9yt7jALqhd5ivLoOQTe9t6gyJogvY0eBkAkUStzfgbBNYkd1bHpi8bTyg/892s6W+iWNUuf/2yCbuiL5qTEu5Gy7wWkzdcJx2E8ih6+RzEF4p8FNyxgCAYj22Le0FXTs2bQI1zi52vr8SW8pT5DeIBunHYHs/CfUm2hmIZIF8sNfQ7kz2Vp3eglWq84PjsOYgNzA864BU7vn+tyqeYrKzaH9dokJi4Xl4Onj28A5pG+K45m2zOx1lnxZ4vkESIXM6TFutPA93MO60/HktEEzO/Cb9EjvWara6S/Q5iBZ5wCd0aqMhNWDiBijQigKMS5XFvUxmmBZtAQ4eRYUPFZjhzJJdnpoErhaBBDv3HiMSqDynqF/rTv7E43Jg71ozgZr8Cg59/oRB6bnS1dZb2qp4NTH1rctxmzo7neUKE5K3EVcXgSHksozfsLo7AriP4bP9X/B4YbAInIRs9xR+F4cZcif7sv6t0CPiK7p2UjaPVl8KhvA1Qbe6No=";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -1054,17 +1063,20 @@ function popupHtml(p){
 
 PLANTS.forEach(p=>{
   const k = riskOf(p);
-  // 丸数字ピン（被害3回以上は外枠を赤くにじませる）
+  // v7：しずく型ピン（先端が発電所の位置。色＝危険度、数字＝番号、右上の黒丸＝被害回数(3回以上)）
+  const badge = p.dmg>=3 ? `<span class="mk-b" title="被害${p.dmg}回">${p.dmg}</span>` : '';
   const icon = L.divIcon({
     className:'',
-    html:`<div class="pin risk${k} ${p.dmg>=3?'dmg':''}" style="background:${RISK[k].hex}">${p.n}</div>`,
-    iconSize:[30,30], iconAnchor:[15,15], popupAnchor:[0,-14]
+    html:`<div class="mk risk${k} ${k==='D'?'small':''}">`+
+         `<svg viewBox="0 0 30 40"><path d="M15 1.5C7.5 1.5 1.5 7.4 1.5 14.7c0 9.6 12 21.7 12.7 22.4a1.1 1.1 0 0 0 1.6 0c.7-.7 12.7-12.8 12.7-22.4C28.5 7.4 22.5 1.5 15 1.5z" fill="${RISK[k].hex}" stroke="#fff" stroke-width="2"/></svg>`+
+         `<span class="mk-n">${p.n}</span>${badge}</div>`,
+    iconSize:[30,40], iconAnchor:[15,39], popupAnchor:[0,-36]
   });
   // 危険度が高いものほど上に重なるように zIndex を付ける
   const z = {A:400,B:300,C:200,D:100,'-':0}[k];
   const m = L.marker(p.latlng,{icon, zIndexOffset:z, title:p.name})
     .bindPopup(popupHtml(p),{maxWidth:340})
-    .bindTooltip(p.name.replace('発電所',''),{direction:'right',offset:[14,0],className:'lbl'});
+    .bindTooltip(p.name.replace('発電所',''),{direction:'right',offset:[12,-22],className:'lbl'});
   m.on('click',()=>selectItem(p.no,false));
   markers[p.no] = m;
 });
@@ -1133,7 +1145,7 @@ function applyFilter(){
 function applyLabels(){
   PLANTS.forEach(p=>{
     markers[p.no].unbindTooltip().bindTooltip(p.name.replace('発電所',''),
-      {direction:'right',offset:[14,0],className:'lbl',permanent:showLabels});
+      {direction:'right',offset:[12,-22],className:'lbl',permanent:showLabels});
   });
   document.getElementById('bLabel').classList.toggle('on', showLabels);
 }
@@ -1142,7 +1154,10 @@ function applyLabels(){
 let selNo = null;
 function selectItem(no, move){
   if(selNo && items[selNo]) items[selNo].classList.remove('sel');   // 前の選択だけ外す
+  // v7：前に選んだピンを元の大きさに戻し、今のピンを大きくする
+  if(selNo && markers[selNo] && markers[selNo].getElement()){ const e0 = markers[selNo].getElement().querySelector('.mk'); if(e0) e0.classList.remove('sel'); }
   selNo = no; items[no].classList.add('sel');
+  if(markers[no].getElement()){ const e1 = markers[no].getElement().querySelector('.mk'); if(e1) e1.classList.add('sel'); }
   items[no].scrollIntoView({block:'nearest'});
   if(move){
     // v1 の flyTo は途中のズーム段階の航空写真まで全部読みに行くので重い
