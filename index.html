@@ -745,14 +745,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .chip.city b{font-weight:400;color:var(--sub);margin-left:2px}
   .chip.city.on{background:var(--accent);color:#fff;border-color:var(--accent)}
   .chip.city.on b{color:#e6f0ea}
-  /* v7.5：iPhoneでは市町村ボタンを地図の上に常に出す（Googleマップの上のボタン列の形。横にすべらせて選ぶ） */
-  #cityChips.onmap{position:absolute;top:8px;left:8px;right:62px;z-index:1000;display:flex;flex-wrap:nowrap;
-    gap:6px;overflow-x:auto;padding:2px 2px 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-  #cityChips.onmap::-webkit-scrollbar{display:none}
-  #cityChips.onmap .chip{flex:0 0 auto;background:#fff;border:none;border-radius:16px;padding:7px 12px;
-    font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.35);color:#202124}
+  /* v7.7：iPhoneでは市町村ボタンを地図の上に常に出す（上下2段・横5列。すべらせなくても全部見える） */
+  #cityChips.onmap{position:absolute;top:8px;left:8px;right:8px;z-index:1000;display:grid;
+    grid-template-columns:repeat(5,1fr);gap:5px}
+  #cityChips.onmap .chip{justify-content:center;background:#fff;border:none;border-radius:14px;padding:6px 2px;
+    font-size:12.5px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.35);color:#202124}
+  #cityChips.onmap .chip b{margin-left:3px}
   #cityChips.onmap .chip.on{background:var(--accent);color:#fff}
-  body.chipsOnMap #gpsBar{top:52px}   /* 市町村ボタンの下にずらす */
+  /* 2段のボタンの下に、右上の地図切替ボタンとGPSの帯をずらす */
+  body.chipsOnMap .leaflet-top.leaflet-right{margin-top:70px}
+  body.chipsOnMap #gpsBar{top:78px}   /* 市町村ボタン（2段）の下にずらす */
   .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
   .btns{display:flex;gap:6px;flex-wrap:wrap}
   .btns button{flex:1;padding:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);
@@ -924,7 +926,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7.6 202609301840</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7.7 202609301844</span></h1>
     <div class="kpi" id="kpi"></div>
     <!-- v6.4：押すとGitHubに新しい版があるか確かめて、あれば切り替える -->
     <button id="bUpd" title="新しい版があれば切り替える">↻ 更新</button>
@@ -956,7 +958,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
