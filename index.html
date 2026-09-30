@@ -777,8 +777,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   /* 目立たせない：小さめ・薄い背景・影なし（ユーザー指示） */
   .mapnote{background:rgba(255,255,255,.55);color:#555;font-size:10px;line-height:1.3;padding:1px 6px;
     border-radius:3px;pointer-events:none;max-width:70vw;margin-bottom:2px!important}
-  .lbl{background:rgba(255,255,255,.92);border:1px solid #bbb;border-radius:4px;padding:1px 5px;
-    font-size:11px;font-weight:bold;white-space:nowrap;box-shadow:none}
+  /* v7.3：ピン横の発電所名（Googleマップの航空写真風：白い文字＋黒いふち、枠なし） */
+  .lbl{background:none;border:none;box-shadow:none;padding:0;color:#fff;font-size:12px;font-weight:700;
+    white-space:nowrap;text-shadow:0 0 2px #000,0 0 3px #000,0 1px 2px #000;pointer-events:none}
   .lbl::before{display:none}
 
   /* ---------- ポップアップ（詳細情報） ---------- */
@@ -905,7 +906,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7.1 202609301820</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v7.3 202609301825</span></h1>
     <div class="kpi" id="kpi"></div>
     <!-- v6.4：押すとGitHubに新しい版があるか確かめて、あれば切り替える -->
     <button id="bUpd" title="新しい版があれば切り替える">↻ 更新</button>
@@ -935,7 +936,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 /* ============================================================
    暗号化データ（公開版作成ツールが差し込む）
    ============================================================ */
-const ENC = "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";
+const ENC = "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";
 
 /* ============================================================
    アプリ本体：復号できた発電所データ PLANTS を受け取って画面を作る
@@ -964,7 +965,7 @@ const riskOf = p => RISK[p.risk] ? p.risk : '-';
 
 /* ---------- 表示中の危険度（チップでON/OFF） ---------- */
 const riskOn = {A:true,B:true,C:true,D:true,'-':true};
-let showLabels = false;   // 名前ラベルを常時表示するか
+let showLabels = true;    // 名前ラベルを常時表示するか（v7.3：最初から表示。ボタンで消せる）
 
 /* ============================================================
    地図の準備
@@ -1001,9 +1002,19 @@ const base = {
   'OpenStreetMap':        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{...TILE_OPT, maxZoom:19, attribution:'&copy; OpenStreetMap contributors'})
 };
 // 航空写真の上に重ねる「道路・地名」（外すと写真だけになる）
+// v7.2：道路はGoogleマップの航空写真のような「白い道路」にする
+//   Esriの道路画像はオレンジで描かれている（画像なので色の指定はできない）
+//   → 道路専用の層(pane)を作り、層ごと「白黒化＋明るく」して白っぽい道路に見せる
+//     オレンジ(明るさ約65%) × 1.5倍 → ほぼ白。文字の黒・白ふちはそのまま読める
+map.createPane('roadsPane');
+const roadsPane = map.getPane('roadsPane');
+roadsPane.style.zIndex = 250;                          // 写真(200)の上、ピン(600)の下
+roadsPane.style.pointerEvents = 'none';                // 道路の層は押せないように
+roadsPane.style.filter = 'grayscale(1) brightness(1.5)';
+roadsPane.style.opacity = '0.85';
 const overlay = {
   '道路・地名を重ねる': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',
-                        {...TILE_OPT, maxZoom:19, maxNativeZoom:18, attribution:ESRI})
+                        {...TILE_OPT, maxZoom:19, maxNativeZoom:18, attribution:ESRI, pane:'roadsPane'})
 };
 base['航空写真（Esri・速い）'].addTo(map);   // 既定＝航空写真
 overlay['道路・地名を重ねる'].addTo(map);
@@ -1152,9 +1163,15 @@ function applyFilter(){
 
 // 名前ラベルの常時表示を切り替える（ボタンを押したときだけ）
 function applyLabels(){
+  // v7.3：同じ場所にある「第一・第二」は名前が重なって読めないので、第一の方に「○○第一・第二」とまとめて出す
+  const pairOf = {};   // 第一の名前 → 第二の番号
+  PLANTS.forEach(p=>{ if(p.shared) pairOf[p.shared] = p.no; });
   PLANTS.forEach(p=>{
-    markers[p.no].unbindTooltip().bindTooltip(p.name.replace('発電所',''),
-      {direction:'right',offset:[12,-22],className:'lbl',permanent:showLabels});
+    const m = markers[p.no].unbindTooltip();
+    let label = p.name.replace('発電所','');
+    if(showLabels && p.shared) return;                   // 第二は常時表示しない（第一にまとめる）
+    if(showLabels && pairOf[p.name]) label += '・第二';  // 例：沢低圧第一・第二
+    m.bindTooltip(label, {direction:'right',offset:[12,-22],className:'lbl',permanent:showLabels});
   });
   document.getElementById('bLabel').classList.toggle('on', showLabels);
 }
@@ -1511,6 +1528,7 @@ document.getElementById('sheetBtn').onclick = ()=>setSheet(!$sheet.classList.con
 
 /* ---------- 初期表示 ---------- */
 applyFilter();
+applyLabels();   // v7.3：最初から発電所名をピンの右に出す
 map.fitBounds(allBounds,{padding:[40,40]});
 }   // ← startApp ここまで
 
