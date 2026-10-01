@@ -760,8 +760,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
   #cityChips.onmap .chip b{margin-left:3px}
   #cityChips.onmap .chip.on{background:var(--accent);color:#fff}
   /* 2段のボタンの下に、右上の地図切替ボタンとGPSの帯をずらす */
-  body.chipsOnMap .leaflet-top.leaflet-right{margin-top:70px}
-  body.chipsOnMap #gpsBar{top:78px}   /* 市町村ボタン（2段）の下にずらす */
+  body.chipsOnMap .leaflet-top.leaflet-right{margin-top:var(--chipsH,70px)}   /* v8.6：ボタンの段数に合わせて実測（placeCityChips） */
+  body.chipsOnMap #gpsBar{top:calc(var(--chipsH,70px) + 8px)}   /* 市町村ボタン（2段）の下にずらす */
   .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
   .btns{display:flex;gap:6px;flex-wrap:wrap}
   .btns button{flex:1;padding:6px;border:1px solid var(--accent);background:#fff;color:var(--accent);
@@ -817,6 +817,24 @@ svg.leaflet-image-layer.leaflet-interactive path {
     box-shadow:0 2px 4px rgba(0,0,0,.5);overflow:hidden}
   .ofclbl.sm{font-size:11px}   /* 店舗の名前も少し小さく */
   .ofm img{width:100%;height:100%;display:block;object-fit:contain}
+  /* v8.6：自家消費の発電所（店舗の屋根・駐車場）
+     ・発電所(30x40)より小さい 24x32 のしずく型。先端＝店舗の位置（店舗マークの上に立つ）
+     ・稼働＝緑に白い太陽／工事中＝黄色と黒のしま模様（工事の柵の柄）に三角コーン */
+  .sk{position:relative;width:24px;height:32px}
+  .sk svg{position:absolute;inset:0;width:24px;height:32px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}
+  .sklbl{background:none;border:none;box-shadow:none;padding:0;color:#fff;font-size:11.5px;font-weight:700;
+    white-space:nowrap;text-shadow:0 0 2px #0b5d2e,0 0 3px #000,0 1px 2px #000;pointer-events:none}
+  .sklbl.kouji{text-shadow:0 0 2px #6b5600,0 0 3px #000,0 1px 2px #000;color:#ffe14d}
+  .sklbl::before{display:none}
+  .hideSelfLbl .sklbl{display:none}   /* 広く見ているときは名前を消す（selfLabelByZoom） */
+  /* 自家消費 ON／OFF ボタン（ONは緑。店舗の紺・市町村の緑と区別するため少し明るい緑） */
+  .chip.self svg{width:14px;height:14px;margin-right:2px}
+  .chip.city.self.on, #cityChips.onmap .chip.self.on{background:#1e9e58;color:#fff;border-color:#1e9e58}
+  .chip.city.self:not(.on){opacity:.6}
+  /* iPhoneの地図の上：市町村は1つ＝2マス、店舗・自家消費は1つ＝5マス（横10マス）→ 3段目に2つ並ぶ */
+  #cityChips.onmap{grid-template-columns:repeat(10,1fr)!important}
+  #cityChips.onmap .chip{grid-column:span 2}
+  #cityChips.onmap .chip.shop, #cityChips.onmap .chip.self{grid-column:span 5}
 
 
   /* ---------- ポップアップ（詳細情報） ---------- */
@@ -948,7 +966,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div></div>
 <div class="app">
   <header>
-    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v8.5 202609302229</span></h1>
+    <h1>☀ 発電所マップ <span style="font-size:11px;opacity:.7">v8.6 202609302229</span></h1>
     <div class="kpi" id="kpi"></div>
     <!-- v6.4：押すとGitHubに新しい版があるか確かめて、あれば切り替える -->
     <button id="bUpd" title="新しい版があれば切り替える">↻ 更新</button>
@@ -1000,6 +1018,9 @@ if(APP_STARTED) return; APP_STARTED = true;
 const OFFICES = PLANTS.filter(p=>p.kind==='office');
 // v8.2：拠点のマーク画像（ファイル名 → data URI）。暗号化データの中にだけ入っている
 const MARKS = (PLANTS.find(p=>p.kind==='marks')||{}).data || {};
+// v8.6：自家消費の発電所（kind:'self'）。29発電所の件数・一覧・市町村・危険度の対象外
+//   name:店舗名 / place:屋根・駐車場 / status:稼働・工事中 / latlng / note
+const SELFS = PLANTS.filter(p=>p.kind==='self');
 PLANTS = PLANTS.filter(p=>!p.kind);   // 発電所だけ残す
 
 /* ---------- 危険度 → 色・説明の対応表 ---------- */
@@ -1186,6 +1207,60 @@ OFFICES.forEach(o=>{
 });
 
 /* ============================================================
+   v8.6：自家消費の発電所（店舗の屋根・駐車場）
+   ・店舗と同じ座標に、小さめのしずく型ピンを立てる（先端が店舗の位置）
+   ・稼働＝緑＋白い太陽、工事中＝黄色と黒のしま模様＋三角コーン
+   ・名前は「自家消費（屋根）」。店舗マークを消しているときは店名も付ける（何の店か分かるように）
+   ・「自家消費」ボタンで表示／非表示
+   ============================================================ */
+const DROP = 'M12 1.2C6 1.2 1.2 5.9 1.2 11.8c0 7.7 9.6 17.4 10.2 17.9a.9.9 0 0 0 1.2 0c.6-.5 10.2-10.2 10.2-17.9C22.8 5.9 18 1.2 12 1.2z';
+function selfIconHtml(o, i){
+  if(o.status === '工事中'){
+    // しま模様は SVG の pattern で塗る。id はピンごとに変える（同じidだと、先のピンを消したとき柄が消える）
+    const id = 'hz' + i;
+    return `<div class="sk"><svg viewBox="0 0 24 32"><defs>
+        <pattern id="${id}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="7" height="7" fill="#ffd400"/><rect width="3.5" height="7" fill="#1f2421"/></pattern></defs>
+        <path d="${DROP}" fill="url(#${id})" stroke="#fff" stroke-width="1.8"/>
+        <circle cx="12" cy="11.8" r="7.2" fill="#fff"/>
+        <path d="M12 6.2l-3.9 9.6h7.8z" fill="#f26b1d"/><rect x="9.6" y="10.3" width="4.8" height="1.6" fill="#fff"/>
+        <rect x="7" y="15.6" width="10" height="1.8" rx=".6" fill="#f26b1d"/></svg></div>`;
+  }
+  // 稼働：緑に白い太陽（丸＋光8本）
+  const rays = [0,45,90,135,180,225,270,315].map(a=>`<rect x="11.2" y="3.6" width="1.6" height="2.6" rx=".8" fill="#fff" transform="rotate(${a} 12 11.8)"/>`).join('');
+  return `<div class="sk"><svg viewBox="0 0 24 32">
+      <path d="${DROP}" fill="#1e9e58" stroke="#fff" stroke-width="1.8"/>
+      <circle cx="12" cy="11.8" r="3.6" fill="#fff"/>${rays}</svg></div>`;
+}
+const selfMarkers = [];
+let selfShopOn = true;   // 店舗マークを出しているか（名前に店名を付けるかの判断に使う。店舗ボタンが書き換える）
+// 名前は短く：「自家消費・屋根」／工事中は「工事中・屋根」
+const selfLabel = o => (selfShopOn ? '' : o.name + ' ') + (o.status==='工事中' ? '工事中' : '自家消費') + '・' + o.place;
+SELFS.forEach((o,i)=>{
+  const [lat,lng] = o.latlng;
+  const g  = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  const gr = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const kouji = o.status === '工事中';
+  const icon = L.divIcon({className:'', html:selfIconHtml(o,i), iconSize:[24,32], iconAnchor:[12,31], popupAnchor:[0,-28]});
+  const mk = L.marker(o.latlng,{icon, zIndexOffset:880, title:o.name + ' 自家消費'})   // 店舗マーク(850)の上、本社(900)の下
+    .bindPopup(`<div class="pop"><h3>${kouji?'🚧':'☀'} ${o.name} 自家消費（${o.place}）</h3><table>
+        <tr><th>状態</th><td><span class="badge" style="background:${kouji?'#1f2421':'#1e9e58'};color:${kouji?'#ffd400':'#fff'}">${kouji?'工事中':'稼働中'}</span></td></tr>
+        <tr><th>設置場所</th><td>${o.place}</td></tr>
+        ${o.note?`<tr><th>備考</th><td>${o.note}</td></tr>`:''}
+        <tr><th>座標</th><td>${lat.toFixed(5)}, ${lng.toFixed(5)}</td></tr></table>
+        <div class="links"><a href="${g}" target="_blank">Googleマップ</a><a class="sub" href="${gr}" target="_blank">ルート検索</a></div></div>`,{maxWidth:300})
+    .bindTooltip(selfLabel(o),{permanent:true,direction:'right',offset:[10,-20],className:'sklbl'+(kouji?' kouji':'')});
+  mk._self = o;
+  selfMarkers.push(mk);
+});
+// 名前を付け直す（店舗の表示を切り替えたとき）
+function relabelSelfs(){ selfMarkers.forEach(m=>m.setTooltipContent(selfLabel(m._self))); }
+// 広く見ているとき（ズーム13未満）は自家消費の名前を出さない（ピンだけ。名前が重なって読めなくなるため）
+const SELF_LBL_ZOOM = 13;
+function selfLabelByZoom(){ map.getContainer().classList.toggle('hideSelfLbl', map.getZoom() < SELF_LBL_ZOOM); }
+map.on('zoomend', selfLabelByZoom); map.whenReady(selfLabelByZoom);   // 最初の表示でも判定
+
+/* ============================================================
    左リストの描画・検索・絞込
    ------------------------------------------------------------
    【v2 軽量化】
@@ -1322,6 +1397,7 @@ const $cityChips = document.getElementById('cityChips');
       t.innerHTML = `<img src="${firstImg}" alt="">${shopOn ? '店舗OFF' : '店舗ON'}`;
       t.classList.toggle('on', shopOn);
       shopMarkers.forEach(m=> shopOn ? m.addTo(map) : m.remove());
+      selfShopOn = shopOn; relabelSelfs();   // v8.6：店舗を消したら自家消費の名前に店名を付ける
     };
     t.onclick = ()=>{
       shopOn = !shopOn; apply();
@@ -1329,6 +1405,27 @@ const $cityChips = document.getElementById('cityChips');
     };
     $cityChips.appendChild(t);
     apply();
+  }
+
+  /* v8.6：自家消費の表示 ON／OFF ボタン（店舗ボタンの次）。文字は「押すとどうなるか」。状態はこの端末に覚える */
+  if(selfMarkers.length){
+    let selfOn = true;
+    try{ selfOn = localStorage.getItem('hatsudenshoMap_self') !== '0'; }catch(e){}
+    const SUN = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#f2a900"/>' +
+      [0,45,90,135,180,225,270,315].map(a=>`<rect x="11" y="1" width="2" height="4" rx="1" fill="#f2a900" transform="rotate(${a} 12 12)"/>`).join('') + '</svg>';
+    const t2 = document.createElement('span');
+    t2.className = 'chip city self';
+    const apply2 = ()=>{
+      t2.innerHTML = `${SUN}${selfOn ? '自家消費OFF' : '自家消費ON'}`;
+      t2.classList.toggle('on', selfOn);
+      selfMarkers.forEach(m=> selfOn ? m.addTo(map) : m.remove());
+    };
+    t2.onclick = ()=>{
+      selfOn = !selfOn; apply2();
+      try{ localStorage.setItem('hatsudenshoMap_self', selfOn ? '1' : '0'); }catch(e){}
+    };
+    $cityChips.appendChild(t2);
+    apply2();
   }
 })();
 
@@ -1340,6 +1437,8 @@ function placeCityChips(){
   if(isMobile()){
     if($cityChips.parentNode !== document.getElementById('map')) document.getElementById('map').appendChild($cityChips);
     $cityChips.classList.add('onmap'); document.body.classList.add('chipsOnMap');
+    // v8.6：ボタンの段数（2段／3段）が変わっても重ならないように、実際の高さを測る
+    requestAnimationFrame(()=>document.body.style.setProperty('--chipsH', ($cityChips.offsetTop + $cityChips.offsetHeight + 6) + 'px'));
   }else{
     if($cityChips.parentNode !== $cityHome) $cityHome.insertBefore($cityChips, $cityNext);
     $cityChips.classList.remove('onmap'); document.body.classList.remove('chipsOnMap');
